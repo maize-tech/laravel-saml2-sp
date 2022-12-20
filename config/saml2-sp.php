@@ -26,6 +26,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enable proxy vars
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify whether you want to enable proxy vars or not.
+    | When true, the package will trust proxy headers such as
+    | HTTP_X_FORWARDED_PROTO.
+    | Useful when your application is running behind a load balancer.
+    |
+    */
+
+    'proxy_vars_enabled' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Login return url
     |--------------------------------------------------------------------------
     |

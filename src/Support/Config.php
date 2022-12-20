@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Maize\Saml2Sp\DefaultSamlConfigFinder;
 use Maize\Saml2Sp\Models\SamlConfig;
 use Maize\Saml2Sp\SamlConfigFinder;
+use Maize\Saml2SP\SamlError;
 use OneLogin\Saml2\Error;
 
 class Config
@@ -26,13 +27,19 @@ class Config
         return new $finder;
     }
 
+    public static function getProxyVarsEnabled(): bool
+    {
+        return config('saml-sp.proxy_vars_enabled')
+            ?? false;
+    }
+
     /**
      * @throws Error
      */
     public static function getLoginReturnURL(): string
     {
         return config('saml-sp.login_return_url')
-            ?? throw new Error('The login return url is required.', Error::REDIRECT_INVALID_URL);
+            ?? throw new SamlError('The login return url is required.', SamlError::REDIRECT_INVALID_URL);
     }
 
     /**
@@ -41,7 +48,7 @@ class Config
     public static function getLogoutReturnURL(): string
     {
         return config('saml-sp.logout_return_url')
-            ?? throw new Error('The logout return url is required.', Error::REDIRECT_INVALID_URL);
+            ?? throw new SamlError('The logout return url is required.', SamlError::REDIRECT_INVALID_URL);
     }
 
     public static function getDomainWhitelist(): array
