@@ -3,6 +3,8 @@
 namespace Maize\Saml2Sp\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Maize\Saml2Sp\Events\SamlLoggedIn;
 use Maize\Saml2Sp\Http\Requests\SamlAcsRequest;
 use Maize\Saml2Sp\Support\Config;
@@ -13,10 +15,10 @@ class SamlAcsController extends SamlController
 {
     /**
      * @throws Error
-     * @throws ValidationError
      * @throws Exception
+     * @throws ValidationError
      */
-    public function __invoke(SamlAcsRequest $request)
+    public function __invoke(SamlAcsRequest $request): Redirector|RedirectResponse
     {
         $destination = $this->retrieveUrl(
             $request->get('RelayState'),
@@ -27,12 +29,11 @@ class SamlAcsController extends SamlController
         $samlAuth->acs();
 
         $userData = $samlAuth->getSamlUser();
+        $user = app(Config::getAuthenticateUserAction(), [
+            $userData,
+        ]);
 
-        $user = app(
-            Config::getAuthenticateUserAction()
-        )($userData);
-
-        SamlLoggedIn::dispatch($user, $userData);
+        SamlLoggedIn::dispatch($user);
 
         return redirect($destination);
     }

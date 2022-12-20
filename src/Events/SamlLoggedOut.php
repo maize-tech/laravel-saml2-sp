@@ -6,7 +6,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SamlLoggedIn
+class SamlLoggedOut
 {
     use SerializesModels;
     use Dispatchable;

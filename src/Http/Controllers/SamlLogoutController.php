@@ -11,14 +11,14 @@ class SamlLogoutController extends SamlController
     /**
      * @throws Error
      */
-    public function __invoke(SamlLogoutRequest $request)
+    public function __invoke(SamlLogoutRequest $request): void
     {
         $returnUrl = $this->retrieveUrl(
             $request->get('return_url'),
             Config::getLogoutReturnURL()
         );
 
-        return $this
+        $this
             ->retrieveAuthManager($request)
             ->logout(
                 returnTo: $returnUrl

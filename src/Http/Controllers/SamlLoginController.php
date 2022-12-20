@@ -11,14 +11,14 @@ class SamlLoginController extends SamlController
     /**
      * @throws Error
      */
-    public function __invoke(SamlLoginRequest $request)
+    public function __invoke(SamlLoginRequest $request): void
     {
         $returnUrl = $this->retrieveUrl(
             $request->get('return_url'),
             Config::getLoginReturnURL()
         );
 
-        return $this
+        $this
             ->retrieveAuthManager($request)
             ->login(
                 returnTo: $returnUrl

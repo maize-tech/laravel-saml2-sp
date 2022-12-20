@@ -114,8 +114,8 @@ class SamlAuth
     }
 
     /**
-     * @throws ValidationError
      * @throws Error
+     * @throws ValidationError
      */
     public function acs(): void
     {
@@ -142,7 +142,36 @@ class SamlAuth
         throw new SamlError(
             msg: 'Invalid acs response: %s',
             code: SamlError::SAML_ACS_INVALID,
-            args: [implode(', ', $errors)]
+            args: [$errors->implode(', ')]
+        );
+    }
+
+    /**
+     * @throws Error
+     */
+    public function sls(): void
+    {
+        $this->auth->processSLO();
+
+        $errors = collect(
+            $this->auth->getErrors()
+        );
+
+        if ($errors->isEmpty()) {
+            return;
+        }
+
+        if (! $this->debug) {
+            throw new SamlError(
+                msg: 'Invalid sls response.',
+                code: SamlError::SAML_SLS_INVALID
+            );
+        }
+
+        throw new SamlError(
+            msg: 'Invalid sls response: %s',
+            code: SamlError::SAML_SLS_INVALID,
+            args: [$errors->implode(', ')]
         );
     }
 }
