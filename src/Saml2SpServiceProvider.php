@@ -16,7 +16,7 @@ class Saml2SpServiceProvider extends PackageServiceProvider
             ->name('laravel-saml2-sp')
             ->hasConfigFile()
             ->hasRoute('routes')
-            ->hasMigration('create_laravel-saml2-sp_table')
+            ->hasMigration('create_saml_configs_table')
             ->hasInstallCommand(
                 fn (InstallCommand $command) => $command
                     ->publishConfigFile()
