@@ -10,6 +10,7 @@ use Maize\Saml2Sp\Models\SamlConfig;
 use Maize\Saml2Sp\SamlConfigFinder;
 use Maize\Saml2Sp\SamlError;
 use OneLogin\Saml2\Error;
+use Spatie\Url\Url;
 
 class Config
 {
@@ -83,11 +84,15 @@ class Config
 
     public static function isDomainWhitelisted(string $endpoint): bool
     {
-        $endpoint = UrlUtils::getUrlDomain($endpoint);
+        $host = str(
+            Url::fromString($endpoint)->getHost()
+        );
 
-        return collect(self::getDomainWhitelist())
-            ->map(fn ($url) => UrlUtils::getUrlDomain($url))
-            ->contains($endpoint);
+        return collect(
+            self::getDomainWhitelist()
+        )->some(
+            fn ($domain) => $host->is($domain)
+        );
     }
 
     public static function getRoutesEnabled(): bool

@@ -7,8 +7,8 @@ use Illuminate\Routing\Controller;
 use Maize\Saml2Sp\SamlAuth;
 use Maize\Saml2Sp\SamlError;
 use Maize\Saml2Sp\Support\Config;
-use Maize\Saml2Sp\Support\UrlUtils;
 use OneLogin\Saml2\Error;
+use Spatie\Url\Url;
 
 abstract class SamlController extends Controller
 {
@@ -30,19 +30,15 @@ abstract class SamlController extends Controller
         return new SamlAuth($samlConfig);
     }
 
-    protected function retrieveUrl(?string $url, ?string $defaultUrl = null): ?string
+    protected function retrieveUrl(?string $url, string $defaultUrl): ?string
     {
-        $url = UrlUtils::sanitizeUrl($url);
-        $defaultUrl = UrlUtils::sanitizeUrl($defaultUrl);
+        $url ??= $defaultUrl;
+        $url = Url::fromString($url)->withScheme('https');
 
-        if (is_null($url)) {
-            return $defaultUrl;
+        if (! Config::isDomainWhitelisted($url)) {
+            return null;
         }
 
-        if (Config::isDomainWhitelisted($url)) {
-            return $url;
-        }
-
-        return $defaultUrl;
+        return $url;
     }
 }
