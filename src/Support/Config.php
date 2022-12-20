@@ -8,7 +8,7 @@ use Illuminate\Support\Arr;
 use Maize\Saml2Sp\DefaultSamlConfigFinder;
 use Maize\Saml2Sp\Models\SamlConfig;
 use Maize\Saml2Sp\SamlConfigFinder;
-use Maize\Saml2SP\SamlError;
+use Maize\Saml2Sp\SamlError;
 use OneLogin\Saml2\Error;
 
 class Config
@@ -57,7 +57,10 @@ class Config
     public static function getLoginReturnURL(): string
     {
         return config('saml2-sp.login_return_url')
-            ?? throw new SamlError('The login return url is required.', SamlError::REDIRECT_INVALID_URL);
+            ?? throw new SamlError(
+                msg: 'The login return url is required.',
+                code: SamlError::REDIRECT_INVALID_URL
+            );
     }
 
     /**
@@ -66,7 +69,10 @@ class Config
     public static function getLogoutReturnURL(): string
     {
         return config('saml2-sp.logout_return_url')
-            ?? throw new SamlError('The logout return url is required.', SamlError::REDIRECT_INVALID_URL);
+            ?? throw new SamlError(
+                msg: 'The logout return url is required.',
+                code: SamlError::REDIRECT_INVALID_URL
+            );
     }
 
     public static function getDomainWhitelist(): array
@@ -113,9 +119,18 @@ class Config
             ?? throw new Exception('The authenticate user action is required.');
     }
 
+    /**
+     * @throws Exception
+     */
+    public static function getLogoutUserAction(): string
+    {
+        return config('saml2-sp.actions.logout_user')
+            ?? throw new Exception('The logout user action is required.');
+    }
+
     public static function getDefaultSamlValues(string $attribute): array
     {
-        return config("saml-sp.default_values.{$attribute}")
+        return config("saml2-sp.default_values.{$attribute}")
             ?? [];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Maize\Saml2SP;
+namespace Maize\Saml2Sp;
 
 use OneLogin\Saml2\Error;
 

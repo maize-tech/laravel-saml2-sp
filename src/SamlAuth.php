@@ -3,6 +3,7 @@
 namespace Maize\Saml2Sp;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Maize\Saml2Sp\Models\SamlConfig;
 use OneLogin\Saml2\Auth;
 use OneLogin\Saml2\Error;
@@ -58,9 +59,9 @@ class SamlAuth
         }
 
         throw new SamlError(
-            'Invalid SP metadata: %s',
-            SamlError::METADATA_SP_INVALID,
-            [implode(', ', $errors)]
+            msg: 'Invalid SP metadata: %s',
+            code: SamlError::METADATA_SP_INVALID,
+            args: [implode(', ', $errors)]
         );
     }
 
@@ -116,31 +117,32 @@ class SamlAuth
      * @throws ValidationError
      * @throws Error
      */
-    public function acs(): self
+    public function acs(): void
     {
         $this->auth->processResponse();
 
-        $errors = $this->auth->getErrors();
+        $errors = collect(
+            $this->auth->getErrors()
+        )->when(
+            ! $this->auth->isAuthenticated(),
+            fn (Collection $errors) => $errors->add('unauthenticated')
+        );
 
-        if (empty($errors)) {
-            return $this;
-        }
-
-        if (! $this->auth->isAuthenticated()) {
-            $errors = ['unauthenticated' => 'Could not authenticate user'];
+        if ($errors->isEmpty()) {
+            return;
         }
 
         if (! $this->debug) {
             throw new SamlError(
-                'Invalid acs response.',
-                SamlError::SAML_ACS_INVALID
+                msg: 'Invalid acs response.',
+                code: SamlError::SAML_ACS_INVALID
             );
         }
 
         throw new SamlError(
-            'Invalid acs response: %s',
-            SamlError::SAML_ACS_INVALID,
-            [implode(', ', $errors)]
+            msg: 'Invalid acs response: %s',
+            code: SamlError::SAML_ACS_INVALID,
+            args: [implode(', ', $errors)]
         );
     }
 }

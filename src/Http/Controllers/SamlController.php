@@ -5,7 +5,7 @@ namespace Maize\Saml2Sp\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Maize\Saml2Sp\SamlAuth;
-use Maize\Saml2SP\SamlError;
+use Maize\Saml2Sp\SamlError;
 use Maize\Saml2Sp\Support\Config;
 use Maize\Saml2Sp\Support\UrlUtils;
 use OneLogin\Saml2\Error;

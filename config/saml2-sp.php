@@ -20,10 +20,11 @@ return [
     |
     | Here you may specify the guard you want to use to authenticate the user.
     | The guard name must be defined in your application's auth.php config file.
+    | When null, the default guard specified in 'auth.php' will be used.
     |
     */
 
-    'auth_guard' => 'web',
+    'auth_guard' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -117,7 +118,33 @@ return [
     ],
 
     'actions' => [
-        'authenticate_user' => Maize\Saml2SP\Actions\AuthenticateUser::class,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authenticate user
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify the fully qualified class name of the auth action.
+        | If needed, you may define your own action, which should override the
+        | default one.
+        |
+        */
+
+        'authenticate_user' => Maize\Saml2Sp\Actions\AuthenticateUser::class,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logout user
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify the fully qualified class name of the logout action.
+        | If needed, you may define your own action, which should override the
+        | default one.
+        |
+        */
+
+        'logout_user' => Maize\Saml2Sp\Actions\LogoutUser::class,
+
     ],
 
     'default_values' => [

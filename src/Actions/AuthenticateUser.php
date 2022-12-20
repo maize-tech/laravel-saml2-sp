@@ -1,6 +1,6 @@
 <?php
 
-namespace Maize\Saml2SP\Actions;
+namespace Maize\Saml2Sp\Actions;
 
 use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
