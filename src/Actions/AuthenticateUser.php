@@ -27,6 +27,7 @@ class AuthenticateUser
      */
     protected function getUser(SamlUserData $userData): Authenticatable
     {
+        /** @var Authenticatable */
         return $this->getUserModel()
             ->query()
             ->where([

@@ -4,16 +4,16 @@ namespace Maize\Saml2Sp;
 
 use OneLogin\Saml2\Settings;
 
-readonly class SamlUserData
+class SamlUserData
 {
     public function __construct(
-        public Settings $settings,
-        public array $attributes,
-        public array $attributesWithFriendlyName,
-        public string $nameId,
-        public string $nameIdFormat,
-        public string $nameIdNameQualifier,
-        public string $nameIdSPNameQualifier,
+        public readonly Settings $settings,
+        public readonly array $attributes,
+        public readonly array $attributesWithFriendlyName,
+        public readonly string $nameId,
+        public readonly string $nameIdFormat,
+        public readonly string $nameIdNameQualifier,
+        public readonly string $nameIdSPNameQualifier,
     ) {
         //
     }

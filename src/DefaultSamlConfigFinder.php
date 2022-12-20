@@ -10,6 +10,7 @@ class DefaultSamlConfigFinder extends SamlConfigFinder
 {
     public static function findForRequest(Request $request): ?SamlConfig
     {
+        /** @var SamlConfig */
         return Config::getSamlConfigModel()
             ->query()
             ->first();
