@@ -5,6 +5,11 @@ namespace Maize\Saml2Sp\Models;
 use Illuminate\Database\Eloquent\Model;
 use Maize\Saml2Sp\Casts\SamlAttributeCast;
 
+/**
+ * @property string $sp
+ * @property string $idp
+ * @property string $security
+ */
 class SamlConfig extends Model
 {
     protected $table = 'saml_configs';
