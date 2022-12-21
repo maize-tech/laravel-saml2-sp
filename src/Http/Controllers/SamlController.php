@@ -30,15 +30,12 @@ abstract class SamlController extends Controller
         return new SamlAuth($samlConfig);
     }
 
-    protected function retrieveUrl(?string $url, string $defaultUrl): ?string
+    protected function retrieveUrl(?string $url, string $defaultUrl): string
     {
-        $url ??= $defaultUrl;
-        $url = Url::fromString($url)->withScheme('https');
-
-        if (! Config::isDomainWhitelisted($url)) {
-            return null;
+        if (is_null($url) || ! Config::isDomainWhitelisted($url)) {
+            $url = $defaultUrl;
         }
 
-        return $url;
+        return Url::fromString($url)->withScheme('https');
     }
 }
