@@ -26,7 +26,9 @@ class SamlSlsController extends SamlController
         $samlAuth = $this->retrieveAuthManager($request);
         $samlAuth->sls();
 
-        $user = app(Config::getLogoutUserAction());
+        $user = app(
+            Config::getLogoutUserAction()
+        )();
 
         SamlLoggedOut::dispatch($user);
 

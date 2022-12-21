@@ -29,9 +29,9 @@ class SamlAcsController extends SamlController
         $samlAuth->acs();
 
         $userData = $samlAuth->getSamlUser();
-        $user = app(Config::getAuthenticateUserAction(), [
-            $userData,
-        ]);
+        $user = app(
+            Config::getAuthenticateUserAction()
+        )($userData);
 
         SamlLoggedIn::dispatch($user);
 
