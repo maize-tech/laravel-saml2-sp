@@ -19,7 +19,9 @@ class LogoutUser
 
     protected function getUser(): Authenticatable
     {
-        return auth()->user();
+        return Auth::guard(
+            $this->getAuthGuard()
+        )->user();
     }
 
     protected function logoutUser(Authenticatable $user): void
