@@ -2,6 +2,7 @@
 
 namespace Maize\Saml2Sp;
 
+use Illuminate\Support\Arr;
 use OneLogin\Saml2\Settings;
 
 class SamlUserData
@@ -18,13 +19,25 @@ class SamlUserData
         //
     }
 
-    public function getAttribute($name): ?array
+    public function getAttribute(string $name, bool $onlyFirst = false): mixed
     {
-        return data_get($this->attributes, $name);
+        $attribute = data_get($this->attributes, $name);
+
+        if ($onlyFirst) {
+            return Arr::first($attribute);
+        }
+
+        return $attribute;
     }
 
-    public function getAttributeWithFriendlyName($name): ?array
+    public function getAttributeWithFriendlyName(string $name, bool $onlyFirst = false): mixed
     {
-        return data_get($this->attributesWithFriendlyName, $name);
+        $attribute = data_get($this->attributesWithFriendlyName, $name);
+
+        if ($onlyFirst) {
+            return Arr::first($attribute);
+        }
+
+        return $attribute;
     }
 }
