@@ -10,10 +10,10 @@ class SamlUserData
         public readonly Settings $settings,
         public readonly array $attributes,
         public readonly array $attributesWithFriendlyName,
-        public readonly string $nameId,
-        public readonly string $nameIdFormat,
-        public readonly string $nameIdNameQualifier,
-        public readonly string $nameIdSPNameQualifier,
+        public readonly ?string $nameId,
+        public readonly ?string $nameIdFormat,
+        public readonly ?string $nameIdNameQualifier,
+        public readonly ?string $nameIdSPNameQualifier,
     ) {
         //
     }
