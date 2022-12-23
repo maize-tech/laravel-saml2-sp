@@ -18,8 +18,6 @@ use Maize\Saml2Sp\Support\Config;
  */
 class SamlConfig extends Model
 {
-    protected $table = 'saml_configs';
-
     protected $fillable = [
         'strict',
         'debug',
