@@ -2,36 +2,58 @@
 
 namespace Maize\Saml2Sp\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Maize\Saml2Sp\Casts\SamlAttributeCast;
+use Maize\Saml2Sp\Support\Config;
 
 /**
- * @property string $sp
- * @property string $idp
- * @property string $security
+ * @property bool $strict
+ * @property bool $debug
+ * @property array $sp
+ * @property array $idp
+ * @property array $security
+ * @property array $contactPerson
+ * @property array $organization
+ * @property array $settings
  */
 class SamlConfig extends Model
 {
     protected $table = 'saml_configs';
 
     protected $fillable = [
+        'strict',
+        'debug',
         'sp',
         'idp',
         'security',
+        'contactPerson',
+        'organization',
     ];
 
     protected $casts = [
-        'sp' => SamlAttributeCast::class,
-        'idp' => SamlAttributeCast::class,
-        'security' => SamlAttributeCast::class,
+        'strict' => 'boolean',
+        'debug' => 'boolean',
+        'sp' => 'encrypted:array',
+        'idp' => 'encrypted:array',
+        'security' => 'encrypted:array',
+        'contactPerson' => 'encrypted:array',
+        'organization' => 'encrypted:array',
     ];
 
-    public function getSettingsAttribute()
+    protected function settings(): Attribute
     {
-        return [
-            'sp' => $this->sp,
-            'idp' => $this->idp,
-            'security' => $this->security,
-        ];
+        return Attribute::make(
+            get: fn ($value, $attributes) => collect([
+                'strict',
+                'debug',
+                'sp',
+                'idp',
+                'security',
+                'contactPerson',
+                'organization',
+            ])->map(fn ($key) => [
+                $key => Config::getDefaultSamlValue(attribute: $key, value: $attributes[$key]),
+            ])->toArray()
+        );
     }
 }

@@ -151,35 +151,81 @@ return [
 
         /*
         |--------------------------------------------------------------------------
-        | Service provider values
+        | Strict mode
         |--------------------------------------------------------------------------
         |
-        | Here you may specify the default saml service provider values.
-        | The package will merge those configs with the ones found within `SamlConfig`.
+        | Here you may specify whether the communication between the service and
+        | identity providers should be validated or not.
+        | When true, all requests with invalid data will be automatically rejected.
         |
         */
 
-        'sp' => [
-            'debug' => false,
-            'strict' => true,
-            'entityId' => null,
-            'x509cert' => null,
-            'privateKey' => null,
-            'organization' => [
+        'strict' => true,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Debug mode
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify whether the debug mode is enabled or not.
+        | When true, most authentication errors will be printed out.
+        |
+        */
+
+        'debug' => false,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Organization values
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify the default organization values in many languages.
+        | When needed, you may include another translation following the ISO 639-1
+        | standard language codes.
+        |
+        */
+
+        'organization' => [
+            'en-US' => [
                 'url' => null,
                 'name' => null,
                 'displayname' => null,
             ],
-            'contactPerson' => [
-                'support' => [
-                    'givenName' => null,
-                    'emailAddress' => null,
-                ],
-                'technical' => [
-                    'givenName' => null,
-                    'emailAddress' => null,
-                ],
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Contact information values
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify the default technical and support values.
+        |
+        */
+
+        'contactPerson' => [
+            'support' => [
+                'givenName' => null,
+                'emailAddress' => null,
             ],
+            'technical' => [
+                'givenName' => null,
+                'emailAddress' => null,
+            ],
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Service provider values
+        |--------------------------------------------------------------------------
+        |
+        | Here you may specify the default saml service provider values.
+        |
+        */
+
+        'sp' => [
+            'entityId' => null,
+            'x509cert' => null,
+            'privateKey' => null,
             'singleLogoutService' => [
                 'url' => null,
             ],
@@ -194,7 +240,6 @@ return [
         |--------------------------------------------------------------------------
         |
         | Here you may specify the default saml identity provider values.
-        | The package will merge those configs with the ones found within `SamlConfig`.
         |
         */
 
@@ -218,7 +263,6 @@ return [
         |--------------------------------------------------------------------------
         |
         | Here you may specify the default saml security values.
-        | The package will merge those configs with the ones found within `SamlConfig`.
         |
         */
 

@@ -10,9 +10,13 @@ return new class extends Migration
     {
         Schema::create('saml_configs', function (Blueprint $table) {
             $table->id();
+            $table->boolean('strict')->nullable();
+            $table->boolean('debug')->nullable();
             $table->text('sp')->nullable();
             $table->text('idp')->nullable();
             $table->text('security')->nullable();
+            $table->text('contactPerson')->nullable();
+            $table->text('organization')->nullable();
             $table->timestamps();
         });
     }

@@ -133,9 +133,8 @@ class Config
             ?? throw new Exception('The logout user action is required.');
     }
 
-    public static function getDefaultSamlValues(string $attribute): array
+    public static function getDefaultSamlValue(string $attribute, mixed $value = null): mixed
     {
-        return config("saml2-sp.default_values.{$attribute}")
-            ?? [];
+        return $value ?? config("saml2-sp.default_values.{$attribute}");
     }
 }
