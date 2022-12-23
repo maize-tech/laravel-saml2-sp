@@ -43,7 +43,7 @@ class SamlConfig extends Model
     protected function settings(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => collect([
+            get: fn () => collect([
                 'strict',
                 'debug',
                 'sp',
@@ -52,7 +52,7 @@ class SamlConfig extends Model
                 'contactPerson',
                 'organization',
             ])->mapWithKeys(fn ($key) => [
-                $key => Config::getDefaultSamlValue(attribute: $key, value: $attributes[$key]),
+                $key => Config::getDefaultSamlValue(attribute: $key, value: $this->$key),
             ])->toArray()
         );
     }

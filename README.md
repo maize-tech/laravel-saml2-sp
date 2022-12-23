@@ -270,9 +270,6 @@ return [
         'idp' => [
             'entityId' => null,
             'x509cert' => null,
-            'attributeSchema' => [
-                'email' => null,
-            ],
             'singleLogoutService' => [
                 'url' => null,
             ],
