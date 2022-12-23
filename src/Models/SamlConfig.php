@@ -51,7 +51,7 @@ class SamlConfig extends Model
                 'security',
                 'contactPerson',
                 'organization',
-            ])->map(fn ($key) => [
+            ])->mapWithKeys(fn ($key) => [
                 $key => Config::getDefaultSamlValue(attribute: $key, value: $attributes[$key]),
             ])->toArray()
         );
