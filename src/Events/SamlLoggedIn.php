@@ -10,7 +10,7 @@ class SamlLoggedIn
     use Dispatchable;
 
     public function __construct(
-      public Authenticatable $user
+        public Authenticatable $user
     ) {
         //
     }
