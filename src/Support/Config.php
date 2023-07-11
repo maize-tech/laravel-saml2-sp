@@ -57,11 +57,17 @@ class Config
      */
     public static function getLoginReturnURL(): string
     {
-        return config('saml2-sp.login_return_url')
+        $returnUrl = config('saml2-sp.login_return_url')
             ?? throw new SamlError(
                 msg: 'The login return url is required.',
                 code: SamlError::REDIRECT_INVALID_URL
             );
+
+        if (class_exists($returnUrl)) {
+            $returnUrl = app($returnUrl);
+        }
+
+        return is_callable($returnUrl) ? $returnUrl() : $returnUrl;
     }
 
     /**
@@ -69,11 +75,17 @@ class Config
      */
     public static function getLogoutReturnURL(): string
     {
-        return config('saml2-sp.logout_return_url')
+        $returnUrl = config('saml2-sp.logout_return_url')
             ?? throw new SamlError(
                 msg: 'The logout return url is required.',
                 code: SamlError::REDIRECT_INVALID_URL
             );
+
+        if (class_exists($returnUrl)) {
+            $returnUrl = app($returnUrl);
+        }
+
+        return is_callable($returnUrl) ? $returnUrl() : $returnUrl;
     }
 
     public static function getDomainWhitelist(): array
