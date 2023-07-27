@@ -90,8 +90,10 @@ class Config
 
     public static function getDomainWhitelist(): array
     {
-        return config('saml2-sp.domain_whitelist')
+        $whitelist = config('saml2-sp.domain_whitelist')
             ?? [];
+
+        return Arr::wrap($whitelist);
     }
 
     public static function isDomainWhitelisted(string $endpoint): bool
