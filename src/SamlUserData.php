@@ -21,7 +21,7 @@ class SamlUserData
 
     public function getAttribute(string $name, bool $onlyFirst = false): mixed
     {
-        $attribute = data_get($this->attributes, $name);
+        $attribute = Arr::get($this->attributes, $name);
 
         if ($onlyFirst) {
             return Arr::first($attribute);
@@ -32,7 +32,7 @@ class SamlUserData
 
     public function getAttributeWithFriendlyName(string $name, bool $onlyFirst = false): mixed
     {
-        $attribute = data_get($this->attributesWithFriendlyName, $name);
+        $attribute = Arr::get($this->attributesWithFriendlyName, $name);
 
         if ($onlyFirst) {
             return Arr::first($attribute);
