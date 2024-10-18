@@ -69,13 +69,13 @@ class SamlAuth
      * @throws Error
      */
     public function login(
-        string $returnTo = null,
+        ?string $returnTo = null,
         array $parameters = [],
         bool $forceAuthn = false,
         bool $isPassive = false,
         bool $stay = false,
         bool $setNameIdPolicy = true,
-        string $nameIdValueReq = null
+        ?string $nameIdValueReq = null
     ): ?string {
         return $this->auth->login(
             $returnTo,
@@ -92,14 +92,14 @@ class SamlAuth
      * @throws Error
      */
     public function logout(
-        string $returnTo = null,
+        ?string $returnTo = null,
         array $parameters = [],
-        string $nameId = null,
-        string $sessionIndex = null,
+        ?string $nameId = null,
+        ?string $sessionIndex = null,
         bool $stay = false,
-        string $nameIdFormat = null,
-        string $nameIdNameQualifier = null,
-        string $nameIdSPNameQualifier = null
+        ?string $nameIdFormat = null,
+        ?string $nameIdNameQualifier = null,
+        ?string $nameIdSPNameQualifier = null
     ): ?string {
         return $this->auth->logout(
             $returnTo,

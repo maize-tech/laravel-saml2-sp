@@ -149,6 +149,15 @@ class Config
 
     public static function getDefaultSamlValue(string $attribute, mixed $value = null): mixed
     {
-        return $value ?? config("saml2-sp.default_values.{$attribute}");
+        $defaultValues = config("saml2-sp.default_values.{$attribute}");
+
+        if (! is_array($value)) {
+            return $value ?? $defaultValues;
+        }
+
+        return Arr::undot([
+            ...Arr::dot($defaultValues),
+            ...Arr::dot($value),
+        ]);
     }
 }
