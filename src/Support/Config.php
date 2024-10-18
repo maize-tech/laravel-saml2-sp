@@ -155,9 +155,6 @@ class Config
             return $value ?? $defaultValues;
         }
 
-        return Arr::undot([
-            ...Arr::dot($defaultValues),
-            ...Arr::dot($value),
-        ]);
+        return array_replace_recursive($defaultValues, $value);
     }
 }
