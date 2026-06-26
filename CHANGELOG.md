@@ -2,6 +2,25 @@
 
 All notable changes to `laravel-saml2-sp` will be documented in this file.
 
+## 2.0.0 - Unreleased
+
+### Added
+
+* `Saml2Sp` facade for programmatic access (`config`, `auth`, `metadata`, `loginUrl`, `logoutUrl`).
+* Configurable user resolution via `user_identifier.column` / `user_identifier.saml_attribute`.
+* Just-in-time user provisioning via `jit_provisioning.enabled` + `attribute_map`.
+* Graceful error handling: `SamlError` renders to `error_return_url` (when `app.debug` is off) and dispatches the new `SamlLoginFailed` event.
+* Multi-tenant routing: `RouteKeySamlConfigFinder`, a `key` column on `saml_configs` and the `routes.key_parameter` option.
+* Artisan commands `saml2-sp:metadata` and `saml2-sp:certificate`.
+
+### Changed
+
+* **Breaking:** `SamlLoggedIn` now carries `$userData` and `$config`; `SamlLoggedOut` now carries an optional `$config`. Both events use `readonly` properties.
+* **Breaking:** when no user matches and JIT is disabled, `AuthenticateUser` throws `SamlError` instead of `ModelNotFoundException`.
+* Updated CI workflows, GitHub Actions versions and Dependabot (now also tracks Composer).
+
+See [UPGRADING](UPGRADING.md) for migration details.
+
 ## 1.0.0 - 2026-06-26
 
 ### What's Changed

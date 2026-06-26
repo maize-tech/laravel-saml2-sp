@@ -30,6 +30,29 @@ class Config
         return config('saml2-sp.auth_guard');
     }
 
+    public static function getUserIdentifierColumn(): string
+    {
+        return config('saml2-sp.user_identifier.column')
+            ?? 'email';
+    }
+
+    public static function getUserIdentifierSamlAttribute(): ?string
+    {
+        return config('saml2-sp.user_identifier.saml_attribute');
+    }
+
+    public static function getJitProvisioningEnabled(): bool
+    {
+        return config('saml2-sp.jit_provisioning.enabled')
+            ?? false;
+    }
+
+    public static function getJitAttributeMap(): array
+    {
+        return config('saml2-sp.jit_provisioning.attribute_map')
+            ?? [];
+    }
+
     public static function getSamlConfigModel(): SamlConfig
     {
         $model = config('saml2-sp.config_model')
@@ -88,6 +111,25 @@ class Config
         return is_callable($returnUrl) ? $returnUrl() : $returnUrl;
     }
 
+    public static function getErrorReturnURL(): string
+    {
+        $returnUrl = config('saml2-sp.error_return_url');
+
+        if (is_null($returnUrl)) {
+            try {
+                return self::getLogoutReturnURL();
+            } catch (Error) {
+                return '/';
+            }
+        }
+
+        if (is_string($returnUrl) && class_exists($returnUrl)) {
+            $returnUrl = app($returnUrl);
+        }
+
+        return is_callable($returnUrl) ? $returnUrl() : $returnUrl;
+    }
+
     public static function getDomainWhitelist(): array
     {
         $whitelist = config('saml2-sp.domain_whitelist')
@@ -127,6 +169,11 @@ class Config
             ?? [];
 
         return Arr::wrap($middleware);
+    }
+
+    public static function getRoutesKeyParameter(): ?string
+    {
+        return config('saml2-sp.routes.key_parameter');
     }
 
     /**

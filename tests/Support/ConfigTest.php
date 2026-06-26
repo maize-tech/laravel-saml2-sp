@@ -78,6 +78,49 @@ it('throws when the logout return url is missing', function () {
     Config::getLogoutReturnURL();
 })->throws(SamlError::class, 'The logout return url is required.');
 
+it('returns the user identifier defaults', function () {
+    expect(Config::getUserIdentifierColumn())->toBe('email')
+        ->and(Config::getUserIdentifierSamlAttribute())->toBeNull();
+
+    config()->set('saml2-sp.user_identifier.column', 'username');
+    config()->set('saml2-sp.user_identifier.saml_attribute', 'uid');
+
+    expect(Config::getUserIdentifierColumn())->toBe('username')
+        ->and(Config::getUserIdentifierSamlAttribute())->toBe('uid');
+});
+
+it('returns the jit provisioning configuration', function () {
+    expect(Config::getJitProvisioningEnabled())->toBeFalse()
+        ->and(Config::getJitAttributeMap())->toBe([]);
+
+    config()->set('saml2-sp.jit_provisioning.enabled', true);
+    config()->set('saml2-sp.jit_provisioning.attribute_map', ['name' => 'displayName']);
+
+    expect(Config::getJitProvisioningEnabled())->toBeTrue()
+        ->and(Config::getJitAttributeMap())->toBe(['name' => 'displayName']);
+});
+
+it('returns the route key parameter', function () {
+    expect(Config::getRoutesKeyParameter())->toBeNull();
+
+    config()->set('saml2-sp.routes.key_parameter', 'saml_config');
+
+    expect(Config::getRoutesKeyParameter())->toBe('saml_config');
+});
+
+it('falls back to the logout return url for the error return url', function () {
+    config()->set('saml2-sp.error_return_url', null);
+    config()->set('saml2-sp.logout_return_url', 'https://app.test/login');
+
+    expect(Config::getErrorReturnURL())->toBe('https://app.test/login');
+});
+
+it('returns the configured error return url', function () {
+    config()->set('saml2-sp.error_return_url', 'https://app.test/oops');
+
+    expect(Config::getErrorReturnURL())->toBe('https://app.test/oops');
+});
+
 it('detects whitelisted domains', function () {
     config()->set('saml2-sp.domain_whitelist', ['app.test']);
 

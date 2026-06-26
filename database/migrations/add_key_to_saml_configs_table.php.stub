@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        // Idempotent: fresh installs already create the column in the
+        // create_saml_configs_table migration. This migration only adds it for
+        // applications upgrading from v1.x.
+        if (Schema::hasColumn('saml_configs', 'key')) {
+            return;
+        }
+
+        Schema::table('saml_configs', function (Blueprint $table) {
+            $table->string('key')->nullable()->unique()->after('id');
+        });
+    }
+
+    public function down()
+    {
+        if (! Schema::hasColumn('saml_configs', 'key')) {
+            return;
+        }
+
+        Schema::table('saml_configs', function (Blueprint $table) {
+            $table->dropUnique(['key']);
+            $table->dropColumn('key');
+        });
+    }
+};

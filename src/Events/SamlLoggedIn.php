@@ -4,13 +4,17 @@ namespace Maize\Saml2Sp\Events;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Events\Dispatchable;
+use Maize\Saml2Sp\Models\SamlConfig;
+use Maize\Saml2Sp\SamlUserData;
 
 class SamlLoggedIn
 {
     use Dispatchable;
 
     public function __construct(
-        public Authenticatable $user
+        public readonly Authenticatable $user,
+        public readonly SamlUserData $userData,
+        public readonly ?SamlConfig $config = null,
     ) {
         //
     }

@@ -74,7 +74,10 @@
         "laravel": {
             "providers": [
                 "Maize\\Saml2Sp\\Saml2SpServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Saml2Sp": "Maize\\Saml2Sp\\Facades\\Saml2Sp"
+            }
         }
     },
     "minimum-stability": "dev",

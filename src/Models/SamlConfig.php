@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Maize\Saml2Sp\Support\Config;
 
 /**
+ * @property string|null $key
  * @property bool $strict
  * @property bool $debug
  * @property array $sp
@@ -22,6 +23,7 @@ class SamlConfig extends Model
     use HasFactory;
 
     protected $fillable = [
+        'key',
         'strict',
         'debug',
         'sp',

@@ -12,18 +12,23 @@ use Maize\Saml2Sp\Support\Config;
 if (Config::getRoutesEnabled()) {
     $prefix = Config::getRoutesPrefix();
     $middleware = Config::getRoutesMiddleware();
+    $keyParameter = Config::getRoutesKeyParameter();
+
+    // When serving multiple identity providers, prepend the route key segment
+    // (e.g. saml2/{saml_config}/login) so the config finder can resolve it.
+    $segment = $keyParameter ? '{'.$keyParameter.'}/' : '';
 
     Route::group([
         'prefix' => $prefix,
         'as' => Str::finish($prefix, '.'),
         'middleware' => $middleware,
-    ], function () {
-        Route::get('metadata', SamlMetadataController::class)->name('metadata');
+    ], function () use ($segment) {
+        Route::get($segment.'metadata', SamlMetadataController::class)->name('metadata');
 
-        Route::get('login', SamlLoginController::class)->name('login');
-        Route::post('acs', SamlAcsController::class)->name('acs');
+        Route::get($segment.'login', SamlLoginController::class)->name('login');
+        Route::post($segment.'acs', SamlAcsController::class)->name('acs');
 
-        Route::get('logout', SamlLogoutController::class)->name('logout');
-        Route::match(['GET', 'POST'], 'sls', SamlSlsController::class)->name('sls');
+        Route::get($segment.'logout', SamlLogoutController::class)->name('logout');
+        Route::match(['GET', 'POST'], $segment.'sls', SamlSlsController::class)->name('sls');
     });
 }

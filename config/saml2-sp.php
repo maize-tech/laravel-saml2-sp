@@ -33,6 +33,43 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | User identifier
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify how the authenticated user is resolved from the SAML
+    | response. The package looks up your user model using the given 'column'.
+    | When 'saml_attribute' is null the nameId is used as the lookup value,
+    | otherwise the given SAML attribute (first value) is used instead.
+    |
+    */
+
+    'user_identifier' => [
+        'column' => 'email',
+        'saml_attribute' => null,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Just-in-time (JIT) provisioning
+    |--------------------------------------------------------------------------
+    |
+    | Here you may enable just-in-time user provisioning. When enabled, a user
+    | that does not yet exist is created on its first successful login.
+    | The 'attribute_map' maps your user model columns to SAML attributes, e.g.
+    | ['name' => 'displayName']. The identifier column is always filled with the
+    | resolved identifier value.
+    |
+    */
+
+    'jit_provisioning' => [
+        'enabled' => false,
+        'attribute_map' => [
+            //
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Config model
     |--------------------------------------------------------------------------
     |
@@ -93,6 +130,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Error return url
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the url where users should be redirected when a SAML
+    | error occurs (e.g. an invalid assertion) while debug mode is disabled.
+    | When null, the logout return url is used as fallback. The error message
+    | is flashed to the session under the 'saml2-sp.error' key.
+    |
+    */
+
+    'error_return_url' => null,
+
+    /*
+    |--------------------------------------------------------------------------
     | Domain whitelist
     |--------------------------------------------------------------------------
     |
@@ -114,12 +165,18 @@ return [
     | Here you may specify whether routes should be enabled or not.
     | You can also customize the routes prefix and middlewares.
     |
+    | When serving multiple identity providers, set 'key_parameter' to a route
+    | parameter name (e.g. 'saml_config'). The package routes then include that
+    | segment (e.g. saml2/{saml_config}/login) so a config finder such as the
+    | RouteKeySamlConfigFinder can resolve the right SamlConfig per request.
+    |
     */
 
     'routes' => [
         'enabled' => true,
         'prefix' => 'saml2',
         'middleware' => ['web'],
+        'key_parameter' => null,
     ],
 
     'actions' => [

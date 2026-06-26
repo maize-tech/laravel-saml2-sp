@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Maize\Saml2Sp\Events\SamlLoggedIn;
+use Maize\Saml2Sp\Facades\Saml2Sp;
 use Maize\Saml2Sp\Http\Requests\SamlAcsRequest;
 use Maize\Saml2Sp\Support\Config;
 use OneLogin\Saml2\Error;
@@ -25,7 +26,8 @@ class SamlAcsController extends SamlController
             Config::getLoginReturnURL()
         );
 
-        $samlAuth = $this->retrieveAuthManager($request);
+        $samlConfig = Saml2Sp::config($request);
+        $samlAuth = Saml2Sp::auth($samlConfig);
         $samlAuth->acs();
 
         $userData = $samlAuth->getSamlUser();
@@ -33,7 +35,7 @@ class SamlAcsController extends SamlController
             Config::getAuthenticateUserAction()
         )($userData);
 
-        SamlLoggedIn::dispatch($user);
+        SamlLoggedIn::dispatch($user, $userData, $samlConfig);
 
         return redirect($destination);
     }

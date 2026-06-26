@@ -119,7 +119,18 @@ class SamlAuth
      */
     public function acs(): void
     {
-        $this->auth->processResponse();
+        try {
+            $this->auth->processResponse();
+        } catch (Error $e) {
+            // Normalise low-level OneLogin errors (e.g. a missing SAMLResponse)
+            // into a SamlError so they are handled gracefully like any other
+            // invalid assertion.
+            throw new SamlError(
+                msg: $this->debug ? 'Invalid acs response: %s' : 'Invalid acs response.',
+                code: SamlError::SAML_ACS_INVALID,
+                args: $this->debug ? [$e->getMessage()] : [],
+            );
+        }
 
         $errors = collect(
             $this->auth->getErrors()

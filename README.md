@@ -58,6 +58,43 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | User identifier
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify how the authenticated user is resolved from the SAML
+    | response. The package looks up your user model using the given 'column'.
+    | When 'saml_attribute' is null the nameId is used as the lookup value,
+    | otherwise the given SAML attribute (first value) is used instead.
+    |
+    */
+
+    'user_identifier' => [
+        'column' => 'email',
+        'saml_attribute' => null,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Just-in-time (JIT) provisioning
+    |--------------------------------------------------------------------------
+    |
+    | Here you may enable just-in-time user provisioning. When enabled, a user
+    | that does not yet exist is created on its first successful login.
+    | The 'attribute_map' maps your user model columns to SAML attributes, e.g.
+    | ['name' => 'displayName']. The identifier column is always filled with the
+    | resolved identifier value.
+    |
+    */
+
+    'jit_provisioning' => [
+        'enabled' => false,
+        'attribute_map' => [
+            //
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Config model
     |--------------------------------------------------------------------------
     |
@@ -118,6 +155,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Error return url
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the url where users should be redirected when a SAML
+    | error occurs (e.g. an invalid assertion) while debug mode is disabled.
+    | When null, the logout return url is used as fallback. The error message
+    | is flashed to the session under the 'saml2-sp.error' key.
+    |
+    */
+
+    'error_return_url' => null,
+
+    /*
+    |--------------------------------------------------------------------------
     | Domain whitelist
     |--------------------------------------------------------------------------
     |
@@ -145,6 +196,7 @@ return [
         'enabled' => true,
         'prefix' => 'saml2',
         'middleware' => ['web'],
+        'key_parameter' => null,
     ],
 
     'actions' => [
@@ -400,16 +452,40 @@ A typical flow looks like this:
 You may disable the built-in routes (`routes.enabled => false`) and register your
 own pointing to the package controllers if you need full control.
 
+### Using the facade
+
+The `Saml2Sp` facade gives you programmatic access to the SAML flow, outside of the
+built-in routes — handy to generate the metadata, build the redirect urls yourself
+or inspect the resolved configuration:
+
+```php
+use Maize\Saml2Sp\Facades\Saml2Sp;
+
+// The SamlConfig resolved for the current (or given) request.
+$config = Saml2Sp::config();
+
+// The SP metadata XML.
+$metadata = Saml2Sp::metadata();
+
+// The IdP login / logout urls, without redirecting.
+$loginUrl = Saml2Sp::loginUrl(returnTo: route('dashboard'));
+$logoutUrl = Saml2Sp::logoutUrl(returnTo: route('login'));
+```
+
+Each method optionally accepts a `SamlConfig` (or a `Request`) as first argument, so
+you can target a specific configuration in a multi-tenant setup.
+
 ### Events
 
-The package dispatches two events you can listen to:
+The package dispatches the following events you can listen to:
 
 - `Maize\Saml2Sp\Events\SamlLoggedIn` — after a user is authenticated through the
-  ACS endpoint.
+  ACS endpoint. Exposes the `$user`, the `$userData` (`Maize\Saml2Sp\SamlUserData`)
+  and the resolved `$config` (`Maize\Saml2Sp\Models\SamlConfig`).
 - `Maize\Saml2Sp\Events\SamlLoggedOut` — after a user is logged out through the
-  SLS endpoint.
-
-Both expose the affected user via a public `$user` property:
+  SLS endpoint. Exposes the `$user` and the (optional) `$config`.
+- `Maize\Saml2Sp\Events\SamlLoginFailed` — when a SAML error is rendered (see
+  below). Exposes the `$exception` and the `$request`.
 
 ```php
 use Maize\Saml2Sp\Events\SamlLoggedIn;
@@ -418,19 +494,55 @@ class NotifyUserLoggedIn
 {
     public function handle(SamlLoggedIn $event): void
     {
-        logger()->info('SAML login', ['id' => $event->user->getAuthIdentifier()]);
+        logger()->info('SAML login', [
+            'id' => $event->user->getAuthIdentifier(),
+            'attributes' => $event->userData->attributes,
+        ]);
     }
 }
 ```
 
+### Error handling
+
+When the ACS endpoint receives an invalid assertion the package throws a
+`Maize\Saml2Sp\SamlError`. While `app.debug` is `false`, the exception renders
+itself as a redirect to `error_return_url` (falling back to `logout_return_url`,
+then `/`), flashing the error message to the session under the `saml2-sp.error`
+key, and dispatches the `SamlLoginFailed` event. While `app.debug` is `true`, the
+exception bubbles up to the default handler so you can inspect it.
+
 ### Customizing the authentication logic
 
-The default `AuthenticateUser` action looks up the user by matching its `email`
-column against the SAML `nameId`, then logs it in through the configured guard.
-The default `LogoutUser` action logs out the currently authenticated user.
+By default the package looks up the user by matching the `user_identifier.column`
+(`email`) against the SAML `nameId`, then logs it in through the configured guard.
 
-You can replace either action with your own by pointing the config to a custom
-class:
+You can resolve the user against a different column, or from a specific SAML
+attribute instead of the nameId:
+
+```php
+'user_identifier' => [
+    'column' => 'email',
+    'saml_attribute' => 'urn:oid:0.9.2342.19200300.100.1.3', // e.g. the mail attribute
+],
+```
+
+Enable **just-in-time provisioning** to create the user on its first login,
+mapping your model columns to SAML attributes:
+
+```php
+'jit_provisioning' => [
+    'enabled' => true,
+    'attribute_map' => [
+        'name' => 'displayName',
+    ],
+],
+```
+
+> The user model must allow mass assignment of the mapped columns and the
+> identifier column. Make sure any required column (e.g. `password`) is either
+> mapped, nullable, or filled by a model `creating` hook.
+
+For full control you can still replace the whole action with your own:
 
 ```php
 'actions' => [
@@ -465,9 +577,25 @@ class AuthenticateUser
 
 ### Resolving the configuration per request (multi-tenant)
 
-By default the `DefaultSamlConfigFinder` returns the first `SamlConfig` row. If you
-serve several Identity Providers (e.g. one per tenant or domain), implement your
-own finder and register it in the config:
+By default the `DefaultSamlConfigFinder` returns the first `SamlConfig` row. To serve
+several Identity Providers (e.g. one per tenant), give each `SamlConfig` a unique
+`key`, set a `routes.key_parameter` and use the bundled `RouteKeySamlConfigFinder`:
+
+```php
+'config_finder' => Maize\Saml2Sp\RouteKeySamlConfigFinder::class,
+
+'routes' => [
+    'enabled' => true,
+    'prefix' => 'saml2',
+    'middleware' => ['web'],
+    'key_parameter' => 'saml_config',
+],
+```
+
+The package routes then include the key segment, e.g. `saml2/{saml_config}/login`,
+`saml2/acme/acs`, and the finder resolves the matching `SamlConfig` by its `key`.
+
+You can also implement a fully custom finder by extending `SamlConfigFinder`:
 
 ```php
 use Illuminate\Http\Request;
@@ -487,6 +615,19 @@ class TenantSamlConfigFinder extends SamlConfigFinder
 
 ```php
 'config_finder' => App\Saml\TenantSamlConfigFinder::class,
+```
+
+### Artisan commands
+
+The package ships two helper commands:
+
+```bash
+# Print the SP metadata XML (optionally for a specific config key/id, or to a file)
+php artisan saml2-sp:metadata
+php artisan saml2-sp:metadata acme --output=storage/saml/metadata.xml
+
+# Generate a self-signed certificate and private key for the SP
+php artisan saml2-sp:certificate --cn=my-app.test --days=3650
 ```
 
 ## Testing

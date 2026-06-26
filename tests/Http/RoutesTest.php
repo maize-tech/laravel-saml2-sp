@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Maize\Saml2Sp\Events\SamlLoggedOut;
+use Maize\Saml2Sp\Events\SamlLoginFailed;
 use Maize\Saml2Sp\Models\SamlConfig;
 use OneLogin\Saml2\Error;
 use Orchestra\Testbench\Factories\UserFactory;
@@ -37,6 +38,20 @@ it('fails the acs endpoint without a valid saml response', function () {
 
     $this->post(route('saml2.acs'));
 })->throws(Error::class);
+
+it('redirects and dispatches a failed event on an invalid acs response', function () {
+    Event::fake([SamlLoginFailed::class]);
+    config()->set('app.debug', false);
+
+    SamlConfig::factory()->create();
+
+    $response = $this->post(route('saml2.acs'));
+
+    $response->assertRedirect('https://app.test/login');
+    $response->assertSessionHas('saml2-sp.error');
+
+    Event::assertDispatched(SamlLoginFailed::class);
+});
 
 it('logs the user out and redirects on the sls endpoint', function () {
     Event::fake([SamlLoggedOut::class]);
