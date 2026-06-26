@@ -63,7 +63,7 @@ class Config
                 code: SamlError::REDIRECT_INVALID_URL
             );
 
-        if (class_exists($returnUrl)) {
+        if (is_string($returnUrl) && class_exists($returnUrl)) {
             $returnUrl = app($returnUrl);
         }
 
@@ -81,7 +81,7 @@ class Config
                 code: SamlError::REDIRECT_INVALID_URL
             );
 
-        if (class_exists($returnUrl)) {
+        if (is_string($returnUrl) && class_exists($returnUrl)) {
             $returnUrl = app($returnUrl);
         }
 

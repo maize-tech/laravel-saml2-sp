@@ -3,6 +3,7 @@
 namespace Maize\Saml2Sp\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Maize\Saml2Sp\Support\Config;
 
@@ -18,6 +19,8 @@ use Maize\Saml2Sp\Support\Config;
  */
 class SamlConfig extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'strict',
         'debug',
