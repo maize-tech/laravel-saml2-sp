@@ -12,13 +12,13 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Riccardo Dalla Via",
-            "email": "riccardo.dallavia@maize.io",
+            "name": "Enrico De Lazzari",
+            "email": "enrico.delazzari@maize.io",
             "role": "Developer"
         },
         {
-            "name": "Enrico De Lazzari",
-            "email": "enrico.delazzari@maize.io",
+            "name": "Riccardo Dalla Via",
+            "email": "riccardo.dallavia@maize.io",
             "role": "Developer"
         }
     ],

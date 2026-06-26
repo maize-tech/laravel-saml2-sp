@@ -509,8 +509,8 @@ Please review [our security policy](https://github.com/maize-tech/.github/securi
 
 ## Credits
 
-- [Riccardo Dalla Via](https://github.com/riccardodallavia)
 - [Enrico De Lazzari](https://github.com/enricodelazzari)
+- [Riccardo Dalla Via](https://github.com/riccardodallavia)
 - [All Contributors](../../contributors)
 
 ## License
