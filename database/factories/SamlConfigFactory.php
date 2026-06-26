@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Maize\Saml2Sp\Models\SamlConfig;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Maize\Saml2Sp\Models\SamlConfig>
+ * @extends Factory<SamlConfig>
  */
 class SamlConfigFactory extends Factory
 {
