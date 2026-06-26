@@ -1,11 +1,17 @@
 # Laravel SAML2 Service Provider
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/maize-tech/laravel-saml2-sp.svg?style=flat-square)](https://packagist.org/packages/maize-tech/laravel-saml2-sp)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/maize-tech/laravel-saml2-sp/run-tests?label=tests)](https://github.com/maize-tech/laravel-saml2-sp/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/maize-tech/laravel-saml2-sp/Fix%20PHP%20code%20style%20issues?label=code%20style)](https://github.com/maize-tech/laravel-saml2-sp/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/maize-tech/laravel-saml2-sp/run-tests.yml?branch=main&label=tests)](https://github.com/maize-tech/laravel-saml2-sp/actions/workflows/run-tests.yml)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/maize-tech/laravel-saml2-sp/fix-php-code-style-issues.yml?branch=main&label=code%20style)](https://github.com/maize-tech/laravel-saml2-sp/actions/workflows/fix-php-code-style-issues.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/maize-tech/laravel-saml2-sp.svg?style=flat-square)](https://packagist.org/packages/maize-tech/laravel-saml2-sp)
 
-This package lets you add SAML2 authentication support within your application. 
+This package lets you add SAML2 authentication support within your application.
+
+It acts as a SAML2 **Service Provider** (SP): it exposes the SP metadata, redirects
+users to your Identity Provider (IdP) for authentication, consumes the IdP
+assertion to log the user in, and handles single logout. Under the hood it wraps
+[onelogin/php-saml](https://github.com/SAML-Toolkits/php-saml) and stores one or
+more SAML configurations in the database.
 
 ## Installation
 
@@ -298,9 +304,189 @@ return [
 
 ## Usage
 
+### Minimum configuration
+
+After publishing the config file, set at least the following keys in
+`config/saml2-sp.php` (or via your environment):
+
+- `user_model`: the fully qualified class name of your authenticatable user model.
+- `login_return_url`: where users are redirected after a successful login.
+- `logout_return_url`: where users are redirected after logout.
+- `domain_whitelist`: the list of domains accepted as return urls. Any
+  `return_url` / `RelayState` whose host is not whitelisted falls back to the
+  configured return url. This prevents open-redirect attacks.
+
 ```php
-$saml2SP = new Maize\Saml2Sp();
-echo $saml2SP->echoPhrase('Hello, Maize!');
+'user_model' => App\Models\User::class,
+
+'login_return_url' => 'https://my-app.test/dashboard',
+
+'logout_return_url' => 'https://my-app.test/login',
+
+'domain_whitelist' => [
+    'my-app.test',
+],
+```
+
+Both `login_return_url` and `logout_return_url` also accept a closure or the class
+name of an invokable class, so you can resolve the destination at runtime:
+
+```php
+'login_return_url' => fn () => route('dashboard'),
+```
+
+### Creating a SAML configuration
+
+SAML settings are stored in the database through the `SamlConfig` model. Each row
+holds the service provider (`sp`) and identity provider (`idp`) sections, merged at
+runtime with the `default_values` defined in the config file. The `sp`, `idp`,
+`security`, `contactPerson` and `organization` columns are transparently encrypted.
+
+```php
+use Maize\Saml2Sp\Models\SamlConfig;
+
+SamlConfig::create([
+    'strict' => true,
+    'debug' => false,
+    'sp' => [
+        'entityId' => 'https://my-app.test/saml2/metadata',
+        'assertionConsumerService' => [
+            'url' => 'https://my-app.test/saml2/acs',
+        ],
+        'singleLogoutService' => [
+            'url' => 'https://my-app.test/saml2/sls',
+        ],
+        'x509cert' => '...your SP certificate...',
+        'privateKey' => '...your SP private key...',
+    ],
+    'idp' => [
+        'entityId' => 'https://idp.example.com/metadata',
+        'singleSignOnService' => [
+            'url' => 'https://idp.example.com/sso',
+        ],
+        'singleLogoutService' => [
+            'url' => 'https://idp.example.com/slo',
+        ],
+        'x509cert' => '...your IdP certificate...',
+    ],
+]);
+```
+
+### Routes
+
+When `routes.enabled` is `true` (the default), the package registers the following
+routes under the configured prefix (`saml2` by default) and middleware (`web`):
+
+| Method     | URI              | Name             | Description                                                          |
+|------------|------------------|------------------|----------------------------------------------------------------------|
+| `GET`      | `saml2/metadata` | `saml2.metadata` | Returns the SP metadata XML to share with your IdP.                  |
+| `GET`      | `saml2/login`    | `saml2.login`    | Builds the authentication request and redirects to the IdP.         |
+| `POST`     | `saml2/acs`      | `saml2.acs`      | Assertion Consumer Service: consumes the IdP response and logs in.  |
+| `GET`      | `saml2/logout`   | `saml2.logout`   | Builds the logout request and redirects to the IdP.                 |
+| `GET/POST` | `saml2/sls`      | `saml2.sls`      | Single Logout Service: logs the user out and redirects back.        |
+
+A typical flow looks like this:
+
+1. Share `saml2/metadata` with your Identity Provider.
+2. Send the user to `saml2/login` (optionally with a whitelisted `?return_url=`).
+   They are redirected to the IdP to authenticate.
+3. The IdP posts the assertion back to `saml2/acs`. The package validates it,
+   resolves the matching user and logs them in, then redirects to the
+   `RelayState` (if whitelisted) or to `login_return_url`.
+4. To log out, send the user to `saml2/logout`. After the IdP processes it, the
+   `saml2/sls` endpoint logs the user out locally and redirects to
+   `logout_return_url`.
+
+You may disable the built-in routes (`routes.enabled => false`) and register your
+own pointing to the package controllers if you need full control.
+
+### Events
+
+The package dispatches two events you can listen to:
+
+- `Maize\Saml2Sp\Events\SamlLoggedIn` — after a user is authenticated through the
+  ACS endpoint.
+- `Maize\Saml2Sp\Events\SamlLoggedOut` — after a user is logged out through the
+  SLS endpoint.
+
+Both expose the affected user via a public `$user` property:
+
+```php
+use Maize\Saml2Sp\Events\SamlLoggedIn;
+
+class NotifyUserLoggedIn
+{
+    public function handle(SamlLoggedIn $event): void
+    {
+        logger()->info('SAML login', ['id' => $event->user->getAuthIdentifier()]);
+    }
+}
+```
+
+### Customizing the authentication logic
+
+The default `AuthenticateUser` action looks up the user by matching its `email`
+column against the SAML `nameId`, then logs it in through the configured guard.
+The default `LogoutUser` action logs out the currently authenticated user.
+
+You can replace either action with your own by pointing the config to a custom
+class:
+
+```php
+'actions' => [
+    'authenticate_user' => App\Saml\AuthenticateUser::class,
+    'logout_user' => App\Saml\LogoutUser::class,
+],
+```
+
+A custom authenticate action receives the `Maize\Saml2Sp\SamlUserData` instance
+(name id, attributes and friendly-name attributes) and must return an
+`Illuminate\Contracts\Auth\Authenticatable`:
+
+```php
+use Illuminate\Contracts\Auth\Authenticatable;
+use Maize\Saml2Sp\SamlUserData;
+
+class AuthenticateUser
+{
+    public function __invoke(SamlUserData $userData): Authenticatable
+    {
+        $user = User::firstOrCreate(
+            ['email' => $userData->nameId],
+            ['name' => $userData->getAttribute('displayName', onlyFirst: true)],
+        );
+
+        auth()->login($user);
+
+        return $user;
+    }
+}
+```
+
+### Resolving the configuration per request (multi-tenant)
+
+By default the `DefaultSamlConfigFinder` returns the first `SamlConfig` row. If you
+serve several Identity Providers (e.g. one per tenant or domain), implement your
+own finder and register it in the config:
+
+```php
+use Illuminate\Http\Request;
+use Maize\Saml2Sp\Models\SamlConfig;
+use Maize\Saml2Sp\SamlConfigFinder;
+
+class TenantSamlConfigFinder extends SamlConfigFinder
+{
+    public static function findForRequest(Request $request): ?SamlConfig
+    {
+        return SamlConfig::query()
+            ->where('tenant_id', $request->user()?->tenant_id)
+            ->first();
+    }
+}
+```
+
+```php
+'config_finder' => App\Saml\TenantSamlConfigFinder::class,
 ```
 
 ## Testing
@@ -323,6 +509,7 @@ Please review [our security policy](https://github.com/maize-tech/.github/securi
 
 ## Credits
 
+- [Enrico De Lazzari](https://github.com/enricodelazzari)
 - [Riccardo Dalla Via](https://github.com/riccardodallavia)
 - [All Contributors](../../contributors)
 

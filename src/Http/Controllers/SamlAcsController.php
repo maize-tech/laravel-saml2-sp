@@ -21,7 +21,7 @@ class SamlAcsController extends SamlController
     public function __invoke(SamlAcsRequest $request): Redirector|RedirectResponse
     {
         $destination = $this->retrieveUrl(
-            $request->get('RelayState'),
+            $request->input('RelayState'),
             Config::getLoginReturnURL()
         );
 

@@ -1,5 +1,10 @@
 <?php
 
+use Maize\Saml2Sp\Actions\AuthenticateUser;
+use Maize\Saml2Sp\Actions\LogoutUser;
+use Maize\Saml2Sp\DefaultSamlConfigFinder;
+use Maize\Saml2Sp\Models\SamlConfig;
+
 return [
 
     /*
@@ -35,7 +40,7 @@ return [
     |
     */
 
-    'config_model' => Maize\Saml2Sp\Models\SamlConfig::class,
+    'config_model' => SamlConfig::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -46,7 +51,7 @@ return [
     |
     */
 
-    'config_finder' => Maize\Saml2Sp\DefaultSamlConfigFinder::class,
+    'config_finder' => DefaultSamlConfigFinder::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -130,7 +135,7 @@ return [
         |
         */
 
-        'authenticate_user' => Maize\Saml2Sp\Actions\AuthenticateUser::class,
+        'authenticate_user' => AuthenticateUser::class,
 
         /*
         |--------------------------------------------------------------------------
@@ -143,7 +148,7 @@ return [
         |
         */
 
-        'logout_user' => Maize\Saml2Sp\Actions\LogoutUser::class,
+        'logout_user' => LogoutUser::class,
 
     ],
 
