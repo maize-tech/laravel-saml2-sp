@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-saml2-sp` will be documented in this file.
 
+## 1.1.0 - 2026-06-26
+
+### What's Changed
+
+* Drop Laravel 10, add Laravel 12 & 13, support PHP up to 8.5 by @enricodelazzari in https://github.com/maize-tech/laravel-saml2-sp/pull/11
+
+**Full Changelog**: https://github.com/maize-tech/laravel-saml2-sp/compare/1.0.0...1.1.0
+
 ## 1.0.0 - 2026-06-26
 
 ### What's Changed
