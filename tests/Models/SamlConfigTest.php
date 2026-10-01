@@ -45,3 +45,62 @@ it('builds the merged settings from model values and config defaults', function 
             'wantMessagesSigned' => true,
         ]);
 });
+
+it('drops the organization and contact placeholders left empty in the config defaults', function () {
+    $config = SamlConfig::factory()->make([
+        'contactPerson' => [],
+        'organization' => [],
+    ]);
+
+    $settings = $config->settings;
+
+    expect($settings['contactPerson'])->toBe([])
+        ->and($settings['organization'])->toBe([]);
+});
+
+it('keeps the organization and contacts that are filled in', function () {
+    config()->set('saml2-sp.default_values.contactPerson.support', [
+        'givenName' => 'Support',
+        'emailAddress' => 'support@sp.test',
+    ]);
+
+    $config = SamlConfig::factory()->make([
+        'organization' => [
+            'en-US' => [
+                'url' => 'https://sp.test',
+                'name' => 'SP',
+                'displayname' => 'Service Provider',
+            ],
+        ],
+    ]);
+
+    $settings = $config->settings;
+
+    expect($settings['contactPerson'])->toBe([
+        'support' => [
+            'givenName' => 'Support',
+            'emailAddress' => 'support@sp.test',
+        ],
+    ])->and($settings['organization'])->toBe([
+        'en-US' => [
+            'url' => 'https://sp.test',
+            'name' => 'SP',
+            'displayname' => 'Service Provider',
+        ],
+    ]);
+});
+
+it('keeps partially filled contacts so that php-saml can report them', function () {
+    $config = SamlConfig::factory()->make([
+        'contactPerson' => [
+            'technical' => ['givenName' => 'Tech'],
+        ],
+    ]);
+
+    expect($config->settings['contactPerson'])->toBe([
+        'technical' => [
+            'givenName' => 'Tech',
+            'emailAddress' => null,
+        ],
+    ]);
+});

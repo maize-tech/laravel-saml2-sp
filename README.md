@@ -342,6 +342,11 @@ holds the service provider (`sp`) and identity provider (`idp`) sections, merged
 runtime with the `default_values` defined in the config file. The `sp`, `idp`,
 `security`, `contactPerson` and `organization` columns are transparently encrypted.
 
+The `organization` and `contactPerson` blocks are optional. The config file ships
+them as empty placeholders: an organization language or a contact whose values are
+all left empty is skipped and does not appear in the SP metadata. A partially
+filled entry is still passed to php-saml, which rejects it as invalid settings.
+
 ```php
 use Maize\Saml2Sp\Models\SamlConfig;
 

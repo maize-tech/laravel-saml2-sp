@@ -44,11 +44,6 @@ class TestCase extends Orchestra
         config()->set('saml2-sp.login_return_url', 'https://app.test/home');
         config()->set('saml2-sp.logout_return_url', 'https://app.test/login');
         config()->set('saml2-sp.domain_whitelist', ['app.test']);
-
-        // OneLogin rejects partially-filled contact/organization blocks, so the
-        // test environment leaves them empty (as a minimal deployment would).
-        config()->set('saml2-sp.default_values.contactPerson', []);
-        config()->set('saml2-sp.default_values.organization', []);
     }
 
     protected function defineDatabaseMigrations(): void

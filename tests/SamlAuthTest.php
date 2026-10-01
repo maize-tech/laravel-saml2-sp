@@ -30,6 +30,39 @@ it('generates valid sp metadata containing the entity id', function () {
         ->and($metadata)->toContain('<?xml');
 });
 
+it('generates sp metadata without organization and contacts when the config placeholders are left empty', function () {
+    $metadata = (new SamlAuth(SamlConfig::factory()->make()))->getMetadata();
+
+    expect($metadata)->not->toContain('<md:Organization')
+        ->and($metadata)->not->toContain('<md:ContactPerson');
+});
+
+it('includes the organization and contacts in the sp metadata when they are filled in', function () {
+    config()->set('saml2-sp.default_values.organization.en-US', [
+        'url' => 'https://sp.test',
+        'name' => 'SP',
+        'displayname' => 'Service Provider',
+    ]);
+
+    $metadata = (new SamlAuth(SamlConfig::factory()->make([
+        'contactPerson' => [
+            'technical' => ['givenName' => 'Tech', 'emailAddress' => 'tech@sp.test'],
+        ],
+    ])))->getMetadata();
+
+    expect($metadata)->toContain('<md:OrganizationDisplayName xml:lang="en-US">Service Provider</md:OrganizationDisplayName>')
+        ->and($metadata)->toContain('<md:ContactPerson contactType="technical">')
+        ->and($metadata)->toContain('tech@sp.test');
+});
+
+it('throws when a contact is only partially filled in', function () {
+    new SamlAuth(SamlConfig::factory()->make([
+        'contactPerson' => [
+            'technical' => ['givenName' => 'Tech'],
+        ],
+    ]));
+})->throws(Error::class);
+
 it('builds a login redirect url towards the idp sso endpoint', function () {
     $auth = new SamlAuth(SamlConfig::factory()->make());
 

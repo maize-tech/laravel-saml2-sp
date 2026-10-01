@@ -187,6 +187,8 @@ return [
         | Here you may specify the default organization values in many languages.
         | When needed, you may include another translation following the ISO 639-1
         | standard language codes.
+        | This block is optional: a language whose values are all left empty is
+        | not included in the SP metadata.
         |
         */
 
@@ -204,6 +206,8 @@ return [
         |--------------------------------------------------------------------------
         |
         | Here you may specify the default technical and support values.
+        | This block is optional: a contact whose values are all left empty is
+        | not included in the SP metadata.
         |
         */
 

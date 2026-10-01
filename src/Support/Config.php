@@ -157,4 +157,23 @@ class Config
 
         return array_replace_recursive($defaultValues, $value);
     }
+
+    /**
+     * Drop the entries whose values are all blank.
+     *
+     * Used for optional metadata blocks such as "organization" and
+     * "contactPerson": the published config ships them with null placeholders
+     * and php-saml rejects any entry that is not completely filled in.
+     * Partially filled entries are kept on purpose so that php-saml can still
+     * report them as a configuration error.
+     *
+     * @param  array<array-key, mixed>|null  $entries
+     * @return array<array-key, mixed>
+     */
+    public static function rejectBlankEntries(?array $entries): array
+    {
+        return collect($entries ?? [])
+            ->reject(fn (mixed $entry): bool => is_array($entry) && collect($entry)->every(fn (mixed $value): bool => blank($value)))
+            ->all();
+    }
 }
