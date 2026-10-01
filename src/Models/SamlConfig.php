@@ -54,7 +54,12 @@ class SamlConfig extends Model
                 'organization',
             ])->mapWithKeys(fn ($key) => [
                 $key => Config::getDefaultSamlValue(attribute: $key, value: $this->$key),
-            ])->toArray()
+            ])->pipe(fn ($settings) => $settings->merge([
+                // Optional metadata blocks: untouched placeholders are dropped so
+                // php-saml does not reject the settings.
+                'contactPerson' => Config::rejectBlankEntries($settings['contactPerson']),
+                'organization' => Config::rejectBlankEntries($settings['organization']),
+            ]))->toArray()
         );
     }
 }
