@@ -2,6 +2,20 @@
 
 All notable changes to `laravel-saml2-sp` will be documented in this file.
 
+## 1.1.1 - 2026-10-01
+
+### What's Changed
+
+* Bump aglipanci/laravel-pint-action from 2.3.0 to 2.3.1 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/15
+* Bump aglipanci/laravel-pint-action from 2.3.1 to 2.6 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/18
+* Bump dependabot/fetch-metadata from 1.6.0 to 3.1.0 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/17
+* Bump actions/checkout from 3 to 7 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/16
+* Bump stefanzweifel/git-auto-commit-action from 4 to 7 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/14
+* Bump ramsey/composer-install from 2 to 4 by @dependabot[bot] in https://github.com/maize-tech/laravel-saml2-sp/pull/13
+* Make organization and contactPerson optional by @enricodelazzari in https://github.com/maize-tech/laravel-saml2-sp/pull/19
+
+**Full Changelog**: https://github.com/maize-tech/laravel-saml2-sp/compare/1.1.0...1.1.1
+
 ## 1.1.0 - 2026-06-26
 
 ### What's Changed
